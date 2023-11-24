@@ -8,8 +8,8 @@ class PhotoGalleryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_photo_gallery)
 
-        val fragmentContainerEmpty = savedInstanceState == null
-        if (fragmentContainerEmpty) {
+        val isFragmentContainerEmpty = savedInstanceState == null
+        if (isFragmentContainerEmpty) {
             supportFragmentManager
                 .beginTransaction()
                 .add(
