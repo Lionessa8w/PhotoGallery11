@@ -1,22 +1,26 @@
 package com.bignerdranch.android.photogallery
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.bignerdranch.android.photogallery.api.FlickrApi
 import com.bignerdranch.android.photogallery.api.FlickrResponse
 import com.bignerdranch.android.photogallery.api.PhotoResponse
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
 
 private const val TAG = "FlickrFetchr"
 
-class FlickrFetchr {
-    private lateinit var flickrApi: FlickrApi
+class FlickrFetcher {
+
+    private var flickrApi: FlickrApi
 
     init {
         val retrofit: Retrofit =
@@ -50,5 +54,18 @@ class FlickrFetchr {
             }
         })
         return responseLiveData
+    }
+    //Аннотация @WorkerThread указывает, что эта функция должна вызываться только в фоновом потоке.
+    //Однако аннотация только дает указания, но не создает фоновый поток и не перемещает туда задачу.
+
+    @WorkerThread
+    fun fetchPhoto(url: String): Bitmap? {
+        //Call.execute(), которая синхронно выполняет веб-запрос.
+        val response: Response<ResponseBody> = flickrApi.fetchUrlBytes(url).execute()
+        val bitmap = response.body()?.byteStream()?.use(BitmapFactory::decodeStream)
+        Log.i(TAG, "Decoded bitmap=$bitmap from Response=$response ")
+        return bitmap
+
+
     }
 }
