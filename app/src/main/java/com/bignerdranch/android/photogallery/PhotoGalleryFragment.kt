@@ -1,8 +1,10 @@
 package com.bignerdranch.android.photogallery
 
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,9 +27,15 @@ class PhotoGalleryFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         photoGalleryViewModel = ViewModelProvider(this)[PhotoGalleryViewModel::class.java]
-        thumbnailDownloader = ThumbnailDownloader()
-        lifecycle.addObserver(thumbnailDownloader)
-        retainInstance = true
+        val responseHandler= Handler()
+        thumbnailDownloader= ThumbnailDownloader(responseHandler){
+            photoHandler, bitmap ->
+            val drawable=BitmapDrawable(resources, bitmap)
+            photoHandler.bindDrawable(drawable)
+        }
+
+        lifecycle.addObserver(thumbnailDownloader.fragmentLifecycleObserver)
+        //retainInstance = true
 
     }
 
@@ -36,6 +44,7 @@ class PhotoGalleryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        viewLifecycleOwner.lifecycle.addObserver(thumbnailDownloader.viewLifecycleObserver)
         val view = inflater.inflate(R.layout.fragment_photo_gallery, container, false)
         photoRecyclerView = view.findViewById(R.id.photo_recycler_view)
         photoRecyclerView.layoutManager = GridLayoutManager(context, 3)
@@ -51,9 +60,15 @@ class PhotoGalleryFragment : Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewLifecycleOwner.lifecycle.removeObserver(thumbnailDownloader.viewLifecycleObserver)
+
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        lifecycle.removeObserver(thumbnailDownloader)
+        lifecycle.removeObserver(thumbnailDownloader.fragmentLifecycleObserver)
     }
 
     companion object {
