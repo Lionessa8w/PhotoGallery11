@@ -1,16 +1,16 @@
 package com.bignerdranch.android.photogallery
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+
 import androidx.lifecycle.ViewModel
-import kotlin.random.Random
+
 
 class PhotoGalleryViewModel : ViewModel() {
 
-    var galleryItemLiveData= LiveData<List<GalleryItem>>()
+    val galleryItemLiveData: LiveData<List<GalleryItem>>
 
     init {
-        galleryItemLiveData=FlickrFetcher().searchPhotos("planets")
+        galleryItemLiveData = FlickrFetcher().searchPhotos("planets")
     }
 //    private val listPhoto = listOf<String>(
 //        "https://timeweb.com/ru/community/article/15/15d1c7d25e936e26523a725e00d64905.jpeg",
